@@ -128,7 +128,7 @@ static PyObject *gc_str = NULL;
 void
 _PyGC_Initialize(struct _gc_runtime_state *state)
 {
-    state->enabled = 1; /* automatic collection enabled? */
+    state->enabled = 0; /* automatic collection enabled? */
 
 #define _GEN_HEAD(n) GEN_HEAD(state, n)
     struct gc_generation generations[NUM_GENERATIONS] = {
