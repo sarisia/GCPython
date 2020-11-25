@@ -7,4 +7,5 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 # ** [Optional] Uncomment this section to install additional packages. **
 RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y build-dep python3.7
+    && apt-get -y build-dep python3.7 \
+    && apt-get -y install gdb
