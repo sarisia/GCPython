@@ -4,6 +4,7 @@
    for any kind of float exception without losing portability. */
 
 #include "Python.h"
+#include "marksweep.h"
 
 #include <ctype.h>
 #include <float.h>
@@ -1997,6 +1998,17 @@ void
 PyFloat_Fini(void)
 {
     (void)PyFloat_ClearFreeList();
+}
+
+void PyFloat_Traverse(markproc mark)
+{
+    PyFloatObject *f = free_list, *next;
+    while (f)
+    {
+        next = (PyFloatObject *)Py_TYPE(f);
+        mark(f);
+        f = next;
+    }
 }
 
 /* Print summary info about the state of the optimized allocator */

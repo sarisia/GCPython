@@ -64,10 +64,19 @@ whose size is determined when the object is allocated.
 #endif
 
 
-#ifdef Py_TRACE_REFS
+#ifdef Py_MARKSWEEP
 /* Define pointers to support a doubly-linked list of all live heap objects. */
 #define _PyObject_HEAD_EXTRA            \
     struct _object *_ob_next;           \
+    struct _object *_ob_prev;           \
+    unsigned char _ms_flags;
+
+#define _PyObject_EXTRA_INIT 0, 0, 0,
+
+#elif defined(Py_TRACE_REFS)
+/* Define pointers to support a doubly-linked list of all live heap objects. */
+#define _PyObject_HEAD_EXTRA  \
+    struct _object *_ob_next; \
     struct _object *_ob_prev;
 
 #define _PyObject_EXTRA_INIT 0, 0,
@@ -121,6 +130,11 @@ typedef struct {
 #define Py_REFCNT(ob)           (_PyObject_CAST(ob)->ob_refcnt)
 #define Py_TYPE(ob)             (_PyObject_CAST(ob)->ob_type)
 #define Py_SIZE(ob)             (_PyVarObject_CAST(ob)->ob_size)
+
+// MarkSweep helper
+#ifdef Py_MARKSWEEP
+#define Py_MSFLAGS(ob) (_PyObject_CAST(ob)->_ms_flags)
+#endif // Py_MARKSWEEP
 
 /*
 Type objects contain a string containing the type name (to help somewhat
@@ -475,7 +489,9 @@ static inline void _Py_DECREF(const char *filename, int lineno,
 #endif
     }
     else {
+#ifndef Py_MARKSWEEP
         _Py_Dealloc(op);
+#endif // Py_MARKSWEEP
     }
 }
 
@@ -740,6 +756,10 @@ PyAPI_FUNC(void) _PyTrash_thread_destroy_chain(void);
 #define Py_TRASHCAN_SAFE_BEGIN(op) Py_TRASHCAN_BEGIN_CONDITION(op, 1)
 #define Py_TRASHCAN_SAFE_END(op) Py_TRASHCAN_END
 
+// Expose refchain
+#ifdef Py_MARKSWEEP
+PyAPI_DATA(PyObject) refchain;
+#endif // Py_MARKSWEEP
 
 #ifndef Py_LIMITED_API
 #  define Py_CPYTHON_OBJECT_H

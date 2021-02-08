@@ -9,6 +9,7 @@
 
 #include "bytes_methods.h"
 #include "pystrhex.h"
+#include "marksweep.h"
 #include <stddef.h>
 
 /*[clinic input]
@@ -3050,6 +3051,13 @@ PyBytes_Fini(void)
     for (i = 0; i < UCHAR_MAX + 1; i++)
         Py_CLEAR(characters[i]);
     Py_CLEAR(nullstring);
+}
+
+void PyBytes_Traverse(markproc mark) {
+    int i;
+    for (i = 0; i < UCHAR_MAX + 1; i++)
+        mark(characters[i]);
+    mark(nullstring);
 }
 
 /*********************** Bytes Iterator ****************************/

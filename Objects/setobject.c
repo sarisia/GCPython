@@ -35,6 +35,7 @@
 #include "pycore_object.h"
 #include "pycore_pystate.h"
 #include "structmember.h"
+#include "marksweep.h"
 
 /* Object used as dummy key to fill deleted entries */
 static PyObject _dummy_struct;
@@ -2322,6 +2323,10 @@ void
 PySet_Fini(void)
 {
     Py_CLEAR(emptyfrozenset);
+}
+
+void PySet_Traverse(markproc mark) {
+    mark(emptyfrozenset);
 }
 
 int

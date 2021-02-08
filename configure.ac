@@ -1235,13 +1235,45 @@ else AC_MSG_RESULT(no); Py_DEBUG='false'
 fi],
 [AC_MSG_RESULT(no)])
 
+# Check for --with-marksweep
+# --with-marksweep
+# this implies --with-trace-refs
+AC_MSG_CHECKING(for --with-marksweep)
+AC_ARG_WITH(
+  marksweep,
+  AS_HELP_STRING(
+    [--with-marksweep],
+    [enable mark-and-sweep garbage collector]
+  ),
+  ,
+  with_marksweep=no
+)
+AC_MSG_RESULT($with_marksweep)
+
+if test "$with_marksweep" = "yes"
+then
+  AC_DEFINE(Py_MARKSWEEP, 1, [Define to enable mark-and-sweep garbage collector])
+  Py_MARKSWEEP="true"
+fi
+
 # Check for --with-trace-refs
 # --with-trace-refs
 AC_MSG_CHECKING(for --with-trace-refs)
 AC_ARG_WITH(trace-refs,
   AS_HELP_STRING([--with-trace-refs],[enable tracing references for debugging purpose]),,
   with_trace_refs=no)
-AC_MSG_RESULT($with_trace_refs)
+# AC_MSG_RESULT($with_trace_refs)
+
+if test "$with_trace_refs" = "yes"
+then
+  AC_MSG_RESULT(yes)
+elif test "$Py_MARKSWEEP" = "true"
+then
+  with_trace_refs="yes"
+  AC_MSG_RESULT(implied by --with-marksweep)
+else
+  AC_MSG_RESULT(no)
+fi
 
 if test "$with_trace_refs" = "yes"
 then

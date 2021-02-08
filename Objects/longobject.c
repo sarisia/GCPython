@@ -4,6 +4,7 @@
 
 #include "Python.h"
 #include "longintrepr.h"
+#include "marksweep.h"
 
 #include <float.h>
 #include <ctype.h>
@@ -5858,6 +5859,22 @@ PyLong_Fini(void)
     for (i = 0; i < NSMALLNEGINTS + NSMALLPOSINTS; i++, v++) {
         _Py_DEC_REFTOTAL;
         _Py_ForgetReference((PyObject*)v);
+    }
+#endif
+}
+
+// mark preallocated small_ints
+void PyLong_Traverse(markproc mark) {
+    mark(_PyLong_One);
+    mark(_PyLong_Zero);
+#if NSMALLNEGINTS + NSMALLPOSINTS > 0
+    int i;
+    PyLongObject *v = small_ints;
+    for (i = 0; i < NSMALLNEGINTS + NSMALLPOSINTS; i++, v++)
+    {
+        // _Py_DEC_REFTOTAL;
+        // _Py_ForgetReference((PyObject *)v);
+        mark(v);
     }
 #endif
 }

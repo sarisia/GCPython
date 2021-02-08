@@ -814,6 +814,7 @@ with_suffix
 enable_shared
 enable_profiling
 with_pydebug
+with_marksweep
 with_trace_refs
 with_assertions
 enable_optimizations
@@ -1513,6 +1514,7 @@ Optional Packages:
                           compiler
   --with-suffix=.exe      set executable suffix
   --with-pydebug          build with Py_DEBUG defined
+  --with-marksweep        enable mark-and-sweep garbage collector
   --with-trace-refs       enable tracing references for debugging purpose
   --with-assertions       build with C assertions enabled
   --with-lto              Enable Link Time Optimization in any build. Disabled
@@ -6360,6 +6362,31 @@ $as_echo "no" >&6; }
 fi
 
 
+# Check for --with-marksweep
+# --with-marksweep
+# this implies --with-trace-refs
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for --with-marksweep" >&5
+$as_echo_n "checking for --with-marksweep... " >&6; }
+
+# Check whether --with-marksweep was given.
+if test "${with_marksweep+set}" = set; then :
+  withval=$with_marksweep;
+else
+  with_marksweep=no
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_marksweep" >&5
+$as_echo "$with_marksweep" >&6; }
+
+if test "$with_marksweep" = "yes"
+then
+
+$as_echo "#define Py_MARKSWEEP 1" >>confdefs.h
+
+  Py_MARKSWEEP="true"
+fi
+
 # Check for --with-trace-refs
 # --with-trace-refs
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for --with-trace-refs" >&5
@@ -6372,8 +6399,21 @@ else
   with_trace_refs=no
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_trace_refs" >&5
-$as_echo "$with_trace_refs" >&6; }
+# AC_MSG_RESULT($with_trace_refs)
+
+if test "$with_trace_refs" = "yes"
+then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+elif test "$Py_MARKSWEEP" = "true"
+then
+  with_trace_refs="yes"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: implied by --with-marksweep" >&5
+$as_echo "implied by --with-marksweep" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
 
 if test "$with_trace_refs" = "yes"
 then

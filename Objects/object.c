@@ -78,7 +78,7 @@ _PyDebug_PrintTotalRefs(void) {
  * together via the _ob_prev and _ob_next members of a PyObject, which
  * exist only in a Py_TRACE_REFS build.
  */
-static PyObject refchain = {&refchain, &refchain};
+PyObject refchain = {&refchain, &refchain};
 
 /* Insert op at the front of the list of all objects.  If force is true,
  * op is added even if _ob_prev and _ob_next are non-NULL already.  If
@@ -1861,6 +1861,9 @@ _Py_NewReference(PyObject *op)
     }
     _Py_INC_REFTOTAL;
     op->ob_refcnt = 1;
+#ifdef Py_MARKSWEEP
+    op->_ms_flags = 0;
+#endif // Py_MARKSWEEP
     _Py_AddToAllObjects(op, 1);
     _Py_INC_TPALLOCS(op);
 }

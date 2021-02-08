@@ -5,6 +5,7 @@
 #include "pycore_object.h"
 #include "pycore_pystate.h"
 #include "pycore_accu.h"
+#include "marksweep.h"
 
 /*[clinic input]
 class tuple "PyTupleObject *" "&PyTuple_Type"
@@ -964,6 +965,29 @@ PyTuple_Fini(void)
 #endif
 #ifdef SHOW_TRACK_COUNT
     show_track();
+#endif
+}
+
+void PyTuple_Traverse(markproc mark) {
+#if PyTuple_MAXSAVESIZE > 0
+    /* empty tuples are used all over the place and applications may
+     * rely on the fact that an empty tuple is a singleton. */
+    mark(free_list[0]);
+
+    int i;
+    for (i = 1; i < PyTuple_MAXSAVESIZE; i++)
+    {
+        PyTupleObject *p, *q;
+        p = free_list[i];
+        // free_list[i] = NULL;
+        // numfree[i] = 0;
+        while (p)
+        {
+            q = p;
+            p = (PyTupleObject *)(p->ob_item[0]);
+            mark(q);
+        }
+    }
 #endif
 }
 

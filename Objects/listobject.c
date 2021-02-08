@@ -5,6 +5,7 @@
 #include "pycore_pystate.h"
 #include "pycore_tupleobject.h"
 #include "pycore_accu.h"
+#include "marksweep.h"
 
 #ifdef STDC_HEADERS
 #include <stddef.h>
@@ -141,6 +142,17 @@ void
 PyList_Fini(void)
 {
     PyList_ClearFreeList();
+}
+
+void PyList_Traverse(markproc mark) {
+    PyListObject *op;
+    int nf = numfree;
+    while (nf)
+    {
+        op = free_list[--nf];
+        // assert(PyList_CheckExact(op));
+        mark(op);
+    }
 }
 
 /* Print summary info about the state of the optimized allocator */
